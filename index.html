@@ -67,6 +67,60 @@
       </article>
     </section>
 
+      <section id="encounter-generator" class="encounter-generator">
+  <h2>Generator de encounters — Andaluria</h2>
+
+  <p class="generator-intro">
+    Generează o întâlnire cu creaturi potrivite pentru atmosfera gotică
+    din Dark Heart of Andaluria.
+  </p>
+
+  <div class="encounter-controls">
+    <label>
+      Tier-ul grupului
+      <select id="encounter-tier">
+        <option value="1">Tier 1 — nivel 1</option>
+        <option value="2">Tier 2 — nivelurile 2–4</option>
+        <option value="3">Tier 3 — nivelurile 5–7</option>
+        <option value="4">Tier 4 — nivelurile 8–10</option>
+      </select>
+    </label>
+
+    <label>
+      Numărul de personaje
+      <input
+        id="encounter-party-size"
+        type="number"
+        min="1"
+        max="8"
+        value="4"
+      >
+    </label>
+
+    <label>
+      Dificultate
+      <select id="encounter-difficulty">
+        <option value="easy">Mai ușoară / mai scurtă</option>
+        <option value="standard" selected>Standard</option>
+        <option value="hard">Mai grea / mai lungă</option>
+      </select>
+    </label>
+  </div>
+
+  <button id="generate-encounter" type="button">
+    Generează encounter
+  </button>
+
+  <div
+    id="encounter-result"
+    class="encounter-result"
+    aria-live="polite"
+  >
+    <p>Alege opțiunile și generează o întâlnire.</p>
+  </div>
+</section>
+
+
     <script src="script.js" defer></script>
   
 
