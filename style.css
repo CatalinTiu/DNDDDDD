@@ -554,3 +554,115 @@ blockquote::before {
     background: #fff;
   }
 }
+
+/* =================================
+   ENCOUNTER GENERATOR
+================================= */
+
+.encounter-generator {
+  max-width: 760px;
+  margin: 3rem auto;
+  padding: 2rem;
+  color: #f4ead4;
+  background: #23161c;
+  border: 1px solid #a97845;
+  border-radius: 12px;
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.35);
+}
+
+.encounter-generator h2 {
+  margin-top: 0;
+  color: #e8b86d;
+  font-family: Georgia, serif;
+  font-size: 2rem;
+}
+
+.encounter-controls {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+  margin: 1.5rem 0;
+}
+
+.encounter-controls label {
+  display: grid;
+  gap: 0.5rem;
+  color: #e8dcc5;
+  font-weight: bold;
+}
+
+.encounter-controls select,
+.encounter-controls input {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 0.7rem;
+  color: #f4ead4;
+  background: #34242b;
+  border: 1px solid #a97845;
+  border-radius: 6px;
+  font: inherit;
+}
+
+#generate-encounter {
+  margin: 0 0 1.5rem;
+  padding: 0.8rem 1.3rem;
+  color: #24171a;
+  background: #d89b4a;
+  border: 0;
+  border-radius: 7px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: bold;
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease;
+}
+
+#generate-encounter:hover {
+  background: #f0bd70;
+  transform: translateY(-2px);
+}
+
+.encounter-result {
+  padding: 1.3rem;
+  background: rgba(12, 10, 16, 0.5);
+  border-left: 4px solid #d89b4a;
+  border-radius: 6px;
+}
+
+.encounter-summary {
+  margin-top: 0;
+  color: #e8b86d;
+}
+
+.encounter-list {
+  display: grid;
+  gap: 0.75rem;
+  padding: 0;
+  list-style: none;
+}
+
+.encounter-list li {
+  padding: 0.8rem;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 5px;
+}
+
+.encounter-enemy-name {
+  color: #fff0c9;
+  font-weight: bold;
+}
+
+.encounter-enemy-meta {
+  display: block;
+  margin-top: 0.25rem;
+  color: #cbb99e;
+  font-size: 0.9rem;
+}
+
+@media (max-width: 600px) {
+  .encounter-generator {
+    padding: 1.2rem;
+  }
+}
+
