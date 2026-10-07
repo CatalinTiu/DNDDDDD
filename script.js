@@ -356,3 +356,296 @@ document.addEventListener("DOMContentLoaded", () => {
   // Generează automat un NPC când pagina se încarcă
   generateAndRenderNPC();
 });
+
+/* =================================
+   GENERATOR DE ENCOUNTERS ANDALURIA
+================================= */
+
+/*
+  Catalog inițial de adversari tematici.
+
+  role: rolul adversarului din Daggerheart
+  tier: tier-ul adversarului
+  bp: costul în Battle Points
+  maxCopies: numărul maxim de copii ale adversarului în encounter
+
+  Costuri BP:
+  Minion (un grup cât party-ul) = 1
+  Social / Support = 1
+  Horde / Ranged / Skulk / Standard = 2
+  Leader = 3
+  Bruiser = 4
+  Solo = 5
+*/
+
+const andaluriaAdversaries = [
+  {
+    name: "Harpy",
+    tier: 1,
+    role: "Skulk",
+    bp: 2,
+    maxCopies: 2
+  },
+  {
+    name: "Head Guard",
+    tier: 1,
+    role: "Leader",
+    bp: 3,
+    maxCopies: 1
+  },
+  {
+    name: "Zombie Pack",
+    tier: 1,
+    role: "Horde",
+    bp: 2,
+    maxCopies: 2
+  },
+  {
+    name: "Minor Demon",
+    tier: 1,
+    role: "Solo",
+    bp: 5,
+    maxCopies: 1
+  },
+  {
+    name: "Urco",
+    tier: 2,
+    role: "Standard",
+    bp: 2,
+    maxCopies: 2
+  },
+  {
+    name: "Valdenhax",
+    tier: 2,
+    role: "Leader",
+    bp: 3,
+    maxCopies: 1
+  },
+  {
+    name: "Vampire",
+    tier: 3,
+    role: "Standard",
+    bp: 2,
+    maxCopies: 2
+  },
+  {
+    name: "Vampire Bat Swarm",
+    tier: 3,
+    role: "Horde",
+    bp: 2,
+    maxCopies: 2
+  },
+  {
+    name: "Head Vampire",
+    tier: 3,
+    role: "Leader",
+    bp: 3,
+    maxCopies: 1
+  },
+  {
+    name: "Vampire Lord",
+    tier: 3,
+    role: "Solo",
+    bp: 5,
+    maxCopies: 1
+  },
+  {
+    name: "Viscera Sucker",
+    tier: 3,
+    role: "Skulk",
+    bp: 2,
+    maxCopies: 2
+  },
+  {
+    name: "Zombie Legion",
+    tier: 4,
+    role: "Horde",
+    bp: 2,
+    maxCopies: 2
+  },
+  {
+    name: "Harbinger of Pestilence",
+    tier: 4,
+    role: "Leader",
+    bp: 3,
+    maxCopies: 1
+  }
+];
+
+function andaluriaRandomItem(array) {
+  return array[Math.floor(Math.random() * array.length)];
+}
+
+function andaluriaGetBudget(partySize, difficulty) {
+  let budget = (3 * partySize) + 2;
+
+  if (difficulty === "easy") {
+    budget -= 1;
+  } else if (difficulty === "hard") {
+    budget += 2;
+  }
+
+  return Math.max(1, budget);
+}
+
+function andaluriaBuildEncounter(tier, partySize, startingBudget) {
+  const availableAdversaries = andaluriaAdversaries.filter(
+    adversary => adversary.tier === tier
+  );
+
+  if (availableAdversaries.length === 0) {
+    return {
+      error: `Nu există încă adversari introduși pentru Tier ${tier}.`
+    };
+  }
+
+  const encounter = [];
+  const copiesByName = new Map();
+
+  let remainingBudget = startingBudget;
+  let soloCount = 0;
+
+  while (remainingBudget > 0) {
+    const candidates = availableAdversaries.filter(adversary => {
+      const copies = copiesByName.get(adversary.name) || 0;
+
+      if (adversary.bp > remainingBudget) {
+        return false;
+      }
+
+      if (copies >= adversary.maxCopies) {
+        return false;
+      }
+
+      // Evită să adauge mai mulți adversari Solo în același encounter.
+      if (adversary.role === "Solo" && soloCount >= 1) {
+        return false;
+      }
+
+      return true;
+    });
+
+    if (candidates.length === 0) {
+      break;
+    }
+
+    const adversary = andaluriaRandomItem(candidates);
+    const copies = copiesByName.get(adversary.name) || 0;
+
+    copiesByName.set(adversary.name, copies + 1);
+    remainingBudget -= adversary.bp;
+
+    if (adversary.role === "Solo") {
+      soloCount += 1;
+    }
+
+    const existing = encounter.find(
+      item => item.name === adversary.name
+    );
+
+    if (existing) {
+      existing.count += 1;
+    } else {
+      encounter.push({
+        name: adversary.name,
+        role: adversary.role,
+        tier: adversary.tier,
+        bp: adversary.bp,
+        count: 1
+      });
+    }
+  }
+
+  const spentBudget = startingBudget - remainingBudget;
+
+  return {
+    encounter,
+    startingBudget,
+    spentBudget,
+    remainingBudget
+  };
+}
+
+function renderAndaluriaEncounter() {
+  const result = document.querySelector("#encounter-result");
+  const tierSelect = document.querySelector("#encounter-tier");
+  const partySizeInput = document.querySelector("#encounter-party-size");
+  const difficultySelect = document.querySelector("#encounter-difficulty");
+
+  const tier = Number(tierSelect.value);
+  const partySize = Math.max(1, Number(partySizeInput.value) || 1);
+  const difficulty = difficultySelect.value;
+  const budget = andaluriaGetBudget(partySize, difficulty);
+
+  const generated = andaluriaBuildEncounter(
+    tier,
+    partySize,
+    budget
+  );
+
+  if (generated.error) {
+    result.innerHTML = `<p>${escapeHTML(generated.error)}</p>`;
+    return;
+  }
+
+  if (generated.encounter.length === 0) {
+    result.innerHTML = `
+      <p>
+        Nu s-a putut compune encounter-ul cu bugetul ales.
+        Încearcă să schimbi numărul personajelor sau dificultatea.
+      </p>
+    `;
+    return;
+  }
+
+  const enemyItems = generated.encounter.map(enemy => {
+    const quantityLabel = enemy.count === 1
+      ? "1 adversar"
+      : `${enemy.count} adversari`;
+
+    return `
+      <li>
+        <span class="encounter-enemy-name">
+          ${escapeHTML(enemy.name)}
+        </span>
+
+        <span class="encounter-enemy-meta">
+          ${quantityLabel} · ${escapeHTML(enemy.role)}
+          · Tier ${enemy.tier}
+          · ${enemy.count * enemy.bp} BP
+        </span>
+      </li>
+    `;
+  }).join("");
+
+  result.innerHTML = `
+    <p class="encounter-summary">
+      Tier ${tier} · party de ${partySize}
+      · buget ${generated.startingBudget} BP
+      · folosiți ${generated.spentBudget} BP
+    </p>
+
+    <ul class="encounter-list">
+      ${enemyItems}
+    </ul>
+
+    ${
+      generated.remainingBudget > 0
+        ? `<p>Au rămas nefolosiți ${generated.remainingBudget} BP.</p>`
+        : ""
+    }
+  `;
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  const button = document.querySelector("#generate-encounter");
+
+  if (!button) {
+    console.error(
+      "Butonul #generate-encounter nu a fost găsit în index.html."
+    );
+    return;
+  }
+
+  button.addEventListener("click", renderAndaluriaEncounter);
+});
